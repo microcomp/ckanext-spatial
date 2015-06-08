@@ -27,6 +27,9 @@ setup(
     [console_scripts]
     cswinfo = ckanext.spatial.commands.cswinfo:cswinfo
 
+    [babel.extractors]
+    ckan = ckan.lib.extract:extract_ckan
+
     [ckan.plugins]
     spatial_metadata=ckanext.spatial.plugin:SpatialMetadata
     spatial_query=ckanext.spatial.plugin:SpatialQuery

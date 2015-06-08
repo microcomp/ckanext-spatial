@@ -12,6 +12,7 @@ from ckan import plugins as p
 from ckan.lib.search import SearchError, PackageSearchQuery
 from ckan.lib.helpers import json
 
+log = getLogger(__name__)
 
 def check_geoalchemy_requirement():
     '''Checks if a suitable geoalchemy version installed
@@ -96,6 +97,21 @@ class SpatialMetadata(p.SingletonPlugin):
     def edit(self, package):
         self.check_spatial_extra(package)
 
+    def retrieve_json(self, name):
+        try:
+            geo_tags = p.toolkit.get_action('tag_list')(
+            data_dict={'vocabulary_id': 'geo_tags', 'all_fields' : True})
+            for tag in geo_tags:
+                if tag.get('name')==name:
+                    log.info('rovnake meno')
+                    related_info = p.toolkit.get_action('ckanext_dataset_get_tag_info')(data_dict={'tag_id': tag.get('id'), 'key' : 'spatial'})
+                    log.info(related_info)
+                    if len(related_info)==1:
+                        return related_info[0].value
+            return None                  
+        except p.toolkit.ObjectNotFound:
+            return None
+    
     def check_spatial_extra(self,package):
         '''
         For a given package, looks at the spatial extent (as given in the
@@ -108,8 +124,14 @@ class SpatialMetadata(p.SingletonPlugin):
         # TODO: deleted extra
         for extra in package.extras_list:
             if extra.key == 'spatial':
-                if extra.state == 'active' and extra.value:
+                if extra.state == 'active' and extra.value and extra.value!='undefined':
                     try:
+                        new_value = self.retrieve_json(extra.value)
+                        log.info('------')
+                        log.info(new_value)
+                        if new_value:
+                            extra.value = str(new_value)
+                        log.debug('Received: %r' % extra.value)
                         log.debug('Received: %r' % extra.value)
                         geometry = json.loads(extra.value)
                     except ValueError,e:
@@ -131,8 +153,9 @@ class SpatialMetadata(p.SingletonPlugin):
                         error_dict = {'spatial':[u'Error: %s' % str(e)]}
                         raise p.toolkit.ValidationError(error_dict, error_summary=package_error_summary(error_dict))
 
-                elif (extra.state == 'active' and not extra.value) or extra.state == 'deleted':
+                elif (extra.state == 'active' and (not extra.value or extra.value=='undefined')) or extra.state == 'deleted':
                     # Delete extent from table
+                    log.warn('spatial - deletting case')
                     save_package_extent(package.id,None)
 
                 break
