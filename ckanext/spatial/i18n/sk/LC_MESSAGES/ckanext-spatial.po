@@ -59,7 +59,7 @@ msgstr "Načítavanie..."
 #: ckanext/spatial/templates/spatial/snippets/dataset_map.html:17
 #: ckanext/spatial/templates/spatial/snippets/dataset_map_sidebar.html:17
 msgid "Dataset extent"
-msgstr "Dataset interval"
+msgstr "Lokalita datasetu"
 
 #: ckanext/spatial/templates/spatial/snippets/spatial_query.html:17
 msgid "Filter by location"
@@ -67,5 +67,5 @@ msgstr "Filtrovať podľa lokácie"
 
 #: ckanext/spatial/templates/spatial/snippets/spatial_query.html:18
 msgid "Clear"
-msgstr "Čistý"
+msgstr "Resetovať"
 

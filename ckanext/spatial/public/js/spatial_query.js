@@ -18,8 +18,8 @@ this.ckan.module('spatial-query', function ($, _) {
     template: {
       buttons: [
         '<div id="dataset-map-edit-buttons">',
-        '<a href="javascript:;" class="btn cancel">Cancel</a> ',
-        '<a href="javascript:;" class="btn apply disabled">Apply</a>',
+        '<a href="javascript:;" class="btn cancel">Zrušiť</a> ',
+        '<a href="javascript:;" class="btn apply disabled">Použiť</a>',
         '</div>'
       ].join('')
     },
