@@ -10,6 +10,7 @@ from lxml import etree
 from ckan.lib.base import request, config, abort
 from ckan.controllers.api import ApiController as BaseApiController
 from ckan.model import Session
+from ckan import plugins as p
 
 from ckanext.harvest.model import HarvestObject, HarvestObjectExtra
 from ckanext.spatial.lib import get_srid, validate_bbox, bbox_query
@@ -31,8 +32,8 @@ class ApiController(BaseApiController):
             abort(400,error_400_msg)
 
         srid = get_srid(request.params.get('crs')) if 'crs' in request.params else None
-
-        extents = bbox_query(bbox,srid)
+        intersection = p.toolkit.asbool(request.params.get('intersection', 'False'))
+        extents = bbox_query(bbox,srid, intersection)
 
         format = request.params.get('format','')
 

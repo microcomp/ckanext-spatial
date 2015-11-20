@@ -3,6 +3,7 @@ from string import Template
 
 from ckan.model import Session, Package
 from ckan.lib.base import config
+from ckan import plugins as p
 
 from ckanext.spatial.model import PackageExtent
 from shapely.geometry import asShape
@@ -136,7 +137,7 @@ def _bbox_2_wkt(bbox, srid):
         input_geometry = WKTElement(wkt,db_srid)
     return input_geometry
 
-def bbox_query(bbox,srid=None):
+def bbox_query(bbox,srid=None,intersection=False):
     '''
     Performs a spatial query of a bounding box.
 
@@ -145,13 +146,20 @@ def bbox_query(bbox,srid=None):
     Returns a query object of PackageExtents, which each reference a package
     by ID.
     '''
+    intersection_conf = p.toolkit.asbool(config.get('ckan.spatial.intersection', 'False'))
+    intersection = intersection or intersection_conf
 
     input_geometry = _bbox_2_wkt(bbox, srid)
-
-    extents = Session.query(PackageExtent) \
-              .filter(PackageExtent.package_id==Package.id) \
-              .filter(PackageExtent.the_geom.intersects(input_geometry)) \
-              .filter(Package.state==u'active')
+    if intersection:
+        extents = Session.query(PackageExtent) \
+                  .filter(PackageExtent.package_id==Package.id) \
+                  .filter(PackageExtent.the_geom.intersects(input_geometry)) \
+                  .filter(Package.state==u'active')
+    else:
+        extents = Session.query(PackageExtent) \
+                  .filter(PackageExtent.package_id==Package.id) \
+                  .filter(PackageExtent.the_geom.within(input_geometry)) \
+                  .filter(Package.state==u'active')
     return extents
 
 def bbox_query_ordered(bbox, srid=None):
@@ -164,7 +172,7 @@ def bbox_query_ordered(bbox, srid=None):
     Returns a query object of PackageExtents, which each reference a package
     by ID.
     '''
-
+    
     input_geometry = _bbox_2_wkt(bbox, srid)
 
     params = {'query_bbox': str(input_geometry),
