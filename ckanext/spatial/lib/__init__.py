@@ -172,7 +172,6 @@ def bbox_query_ordered(bbox, srid=None):
     Returns a query object of PackageExtents, which each reference a package
     by ID.
     '''
-    
     input_geometry = _bbox_2_wkt(bbox, srid)
 
     params = {'query_bbox': str(input_geometry),
